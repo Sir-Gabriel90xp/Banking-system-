@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/banking_system
+    username: banking_user
+    password: ${DB_PASSWORD:banking_pass}
+    driver-class-name: org.postgresql.Driver
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: banking_user
+    password: ${RABBITMQ_PASSWORD:banking_pass}
+
+logging:
+  level:
+    root: INFO
