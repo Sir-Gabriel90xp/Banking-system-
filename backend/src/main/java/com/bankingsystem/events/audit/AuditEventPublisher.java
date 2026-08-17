@@ -1,6 +1,8 @@
 package com.bankingsystem.events.audit;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.bankingsystem.config.RabbitMQConfig;
@@ -26,9 +28,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuditEventPublisher {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final ObjectProvider<RabbitTemplate> rabbitTemplateProvider;
+
+    @Value("${app.messaging.rabbitmq.enabled:false}")
+    private boolean rabbitMqEnabled;
 
     public void publish(AuditEvent event) {
+        if (!rabbitMqEnabled) {
+            log.debug("RabbitMQ disabled; skipping audit event: action={}, entity={}, entityId={}",
+                    event.action(), event.entity(), event.entityId());
+            return;
+        }
+
+        RabbitTemplate rabbitTemplate = rabbitTemplateProvider.getIfAvailable();
+        if (rabbitTemplate == null) {
+            log.warn("RabbitMQ enabled but RabbitTemplate is unavailable; skipping audit event.");
+            return;
+        }
+
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.AUDIT_EXCHANGE,

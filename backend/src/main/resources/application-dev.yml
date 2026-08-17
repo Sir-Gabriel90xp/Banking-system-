@@ -11,6 +11,11 @@ spring:
     username: banking_user
     password: ${RABBITMQ_PASSWORD:banking_pass}
 
+app:
+  messaging:
+    rabbitmq:
+      enabled: ${RABBITMQ_ENABLED:true}
+
 logging:
   level:
     root: INFO

@@ -5,7 +5,7 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * mover ahí sin cambiar su comportamiento.
  */
 @Configuration
-@EnableConfigurationProperties(FraudRulesProperties.class)
+@ConditionalOnProperty(name = "app.messaging.rabbitmq.enabled", havingValue = "true")
 public class FraudRabbitMQConfig {
 
     public static final String FRAUD_EXCHANGE = "banking.fraud.exchange";

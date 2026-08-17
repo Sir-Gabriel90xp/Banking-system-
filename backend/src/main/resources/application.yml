@@ -27,6 +27,9 @@ server:
 app:
   cors:
     allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:4200,http://127.0.0.1:4200,https://*.vercel.app}
+  messaging:
+    rabbitmq:
+      enabled: ${RABBITMQ_ENABLED:false}
   jwt:
     secret: ${JWT_SECRET:change-this-secret-in-production}
     expiration-ms: ${JWT_EXPIRATION_MS:3600000}        # 1h access token

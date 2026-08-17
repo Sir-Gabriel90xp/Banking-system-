@@ -1,6 +1,7 @@
 package com.bankingsystem.events.audit;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.bankingsystem.config.RabbitMQConfig;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "app.messaging.rabbitmq.enabled", havingValue = "true")
 public class AuditEventListener {
 
     private final AuditLogRepository auditLogRepository;

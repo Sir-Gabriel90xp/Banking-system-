@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: banking-system-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
+      - key: RABBITMQ_ENABLED
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGIN_PATTERNS
+        value: https://*.vercel.app
+      - key: SPRING_DATASOURCE_HOST
+        fromDatabase:
+          name: banking-system-db
+          property: host
+      - key: SPRING_DATASOURCE_PORT
+        fromDatabase:
+          name: banking-system-db
+          property: port
+      - key: SPRING_DATASOURCE_DATABASE
+        fromDatabase:
+          name: banking-system-db
+          property: database
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: banking-system-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: banking-system-db
+          property: password
+
+databases:
+  - name: banking-system-db
+    databaseName: banking_system
+    user: banking_user
+    plan: free
+    region: oregon
+    postgresMajorVersion: "16"

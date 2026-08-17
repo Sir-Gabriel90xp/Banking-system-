@@ -5,6 +5,7 @@ import com.bankingsystem.services.fraud.FraudDetectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  * según la configuración global de listener — revisar antes de producción.
  */
 @Component
+@ConditionalOnProperty(name = "app.messaging.rabbitmq.enabled", havingValue = "true")
 public class FraudCheckListener {
 
     private static final Logger log = LoggerFactory.getLogger(FraudCheckListener.class);
