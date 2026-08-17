@@ -1,0 +1,169 @@
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Mercado cambiario</div>
+    <h1 class="title">Divisas</h1>
+  </div>
+  <span class="source-pill">Frankfurter</span>
+</div>
+
+<div class="currency-grid">
+  <section class="panel conversion-panel">
+    <div class="panel-head">
+      <span class="panel-title">Conversor</span>
+    </div>
+
+    <div class="conversion-form">
+      <label>
+        <span>Monto</span>
+        <input type="number" min="0" step="0.01" [(ngModel)]="amount" (keyup.enter)="convert()">
+      </label>
+
+      <label>
+        <span>Desde</span>
+        <select [(ngModel)]="base">
+          @for (currency of currencyOptions(); track currency.isoCode) {
+            <option [value]="currency.isoCode">{{ currencyLabel(currency) }}</option>
+          }
+        </select>
+      </label>
+
+      <button type="button" class="swap-btn" title="Invertir monedas" (click)="swapCurrencies()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path d="M7 7h11m0 0-3-3m3 3-3 3"/>
+          <path d="M17 17H6m0 0 3-3m-3 3 3 3"/>
+        </svg>
+      </button>
+
+      <label>
+        <span>Hacia</span>
+        <select [(ngModel)]="quote">
+          @for (currency of currencyOptions(); track currency.isoCode) {
+            <option [value]="currency.isoCode">{{ currencyLabel(currency) }}</option>
+          }
+        </select>
+      </label>
+
+      <button type="button" class="btn-primary" (click)="convert()" [disabled]="converting()">
+        Convertir
+      </button>
+    </div>
+
+    @if (conversionError()) {
+      <p class="state-msg error compact">{{ conversionError() }}</p>
+    } @else if (conversion()) {
+      <div class="conversion-result">
+        <div class="result-label">{{ conversion()?.amount | number: '1.2-2' }} {{ conversion()?.base }}</div>
+        <div class="result-value">{{ conversion()?.convertedAmount | number: '1.2-2' }} {{ conversion()?.quote }}</div>
+        <div class="result-rate">
+          1 {{ conversion()?.base }} = {{ conversion()?.rate | number: '1.4-6' }} {{ conversion()?.quote }}
+          <span>{{ conversion()?.date }}</span>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="panel rates-panel">
+    <div class="panel-head split">
+      <span class="panel-title">Tasas</span>
+      <button type="button" class="btn-secondary" (click)="loadRates()" [disabled]="loadingRates()">
+        Consultar
+      </button>
+    </div>
+
+    <div class="rates-form">
+      <label>
+        <span>Base</span>
+        <select [(ngModel)]="ratesBase">
+          @for (currency of currencyOptions(); track currency.isoCode) {
+            <option [value]="currency.isoCode">{{ currency.isoCode }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="wide">
+        <span>Quotes</span>
+        <input type="text" [(ngModel)]="ratesQuotes" placeholder="DOP,EUR,GBP">
+      </label>
+
+      <label>
+        <span>Fecha</span>
+        <input type="date" [(ngModel)]="rateDate">
+      </label>
+
+      <label>
+        <span>Desde</span>
+        <input type="date" [(ngModel)]="fromDate">
+      </label>
+
+      <label>
+        <span>Hasta</span>
+        <input type="date" [(ngModel)]="toDate">
+      </label>
+
+      <label>
+        <span>Grupo</span>
+        <select [(ngModel)]="group">
+          <option value="">Diario</option>
+          <option value="week">Semanal</option>
+          <option value="month">Mensual</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Proveedor</span>
+        <select [(ngModel)]="provider">
+          <option value="">Todos</option>
+          @for (source of providers(); track source.key) {
+            <option [value]="source.key">{{ source.key }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" [(ngModel)]="includeProviders">
+        <span>Attribution</span>
+      </label>
+    </div>
+
+    @if (loadingRates()) {
+      <p class="state-msg">Cargando tasas...</p>
+    } @else if (ratesError()) {
+      <p class="state-msg error">{{ ratesError() }}</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Base</th>
+              <th>Quote</th>
+              <th>Tasa</th>
+              <th>Fuentes</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rate of rates(); track rate.date + rate.base + rate.quote) {
+              <tr>
+                <td class="mono">{{ rate.date }}</td>
+                <td class="mono">{{ rate.base }}</td>
+                <td class="mono">{{ rate.quote }}</td>
+                <td class="mono amount">{{ rate.rate | number: '1.4-6' }}</td>
+                <td>
+                  @if (rate.providers.length) {
+                    <span class="status-pill">{{ rate.providers.length }}</span>
+                  } @else {
+                    <span class="mono">-</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="state-msg">No hay tasas para esta consulta.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

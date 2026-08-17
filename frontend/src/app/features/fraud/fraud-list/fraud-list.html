@@ -1,0 +1,62 @@
+<!-- src/app/features/fraud/fraud-list/fraud-list.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Gestion de riesgo</div>
+    <h1 class="title">Fraude</h1>
+  </div>
+  <button class="btn-secondary" (click)="fetch()" [disabled]="loading()">Actualizar</button>
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="state-msg">Cargando alertas de fraude...</p>
+  } @else if (errorMessage()) {
+    <p class="state-msg error">{{ errorMessage() }}</p>
+  } @else {
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Motivo</th>
+          <th>Severidad</th>
+          <th>Estado</th>
+          <th>Detectado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (alert of alerts(); track alert.id) {
+          <tr>
+            <td>
+              <div class="mono">{{ alert.accountNumber }}</div>
+              <div class="subtle mono">{{ alert.accountId }}</div>
+            </td>
+            <td>{{ alert.reason }}</td>
+            <td>
+              <span class="status-pill" [class.danger]="alert.severity === 'HIGH' || alert.severity === 'CRITICAL'">
+                {{ alert.severity }}
+              </span>
+            </td>
+            <td>
+              <span class="status-pill" [class.inactive]="alert.status === 'RESOLVED'">
+                {{ alert.status }}
+              </span>
+            </td>
+            <td class="mono">{{ alert.detectedAt | date: 'medium' }}</td>
+            <td class="actions">
+              <button
+                class="link-btn"
+                (click)="resolve(alert)"
+                [disabled]="alert.status === 'RESOLVED' || resolvingId() === alert.id"
+              >
+                {{ resolvingId() === alert.id ? 'Resolviendo...' : 'Resolver' }}
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="state-msg">No hay alertas de fraude registradas.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

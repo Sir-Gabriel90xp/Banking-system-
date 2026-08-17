@@ -1,0 +1,75 @@
+<!-- src/app/features/accounts/account-list/account-list.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Gestión de cuentas</div>
+    <h1 class="title">Cuentas</h1>
+  </div>
+  @if (canCreateAccount()) {
+    <a routerLink="/accounts/new" class="btn-primary">+ Nueva cuenta</a>
+  }
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="state-msg">Cargando cuentas...</p>
+  } @else if (errorMessage()) {
+    <p class="state-msg error">{{ errorMessage() }}</p>
+  } @else {
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Número de cuenta</th>
+          <th>Tipo</th>
+          <th>Saldo</th>
+          <th>Moneda</th>
+          <!-- Fuente: backend /exchange-rates, usando Frankfurter. -->
+          <th>≈ USD</th>
+          <th>Estado</th>
+          @if (isStaff()) {
+            <th></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of accounts(); track a.id) {
+          <tr>
+            <td class="mono">{{ a.accountNumber }}</td>
+            <td>{{ a.accountType }}</td>
+            <td class="mono amount">{{ a.balance | number: '1.2-2' }}</td>
+            <td class="mono">{{ a.currency }}</td>
+            <td class="mono amount">
+              @if (usdEquivalents()[a.id] === undefined) {
+                <span class="state-msg" style="padding: 0; display: inline;">cargando...</span>
+              } @else if (usdEquivalents()[a.id] === null) {
+                <span class="mono">—</span>
+              } @else {
+                {{ usdEquivalents()[a.id] | number: '1.2-2' }}
+              }
+            </td>
+            <td>
+              <span class="status-pill" [class.inactive]="a.status !== 'ACTIVE'">
+                {{ a.status }}
+              </span>
+            </td>
+            @if (isStaff()) {
+              <td class="actions">
+                <button class="link-btn" (click)="block(a.id, a.accountNumber)">Bloquear</button>
+                <button class="link-btn" (click)="activate(a.id, a.accountNumber)">Activar</button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="state-msg">No hay cuentas registradas todavía.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0">← Anterior</button>
+        <span>Página {{ currentPage() + 1 }} de {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">Siguiente →</button>
+      </div>
+    }
+  }
+</div>

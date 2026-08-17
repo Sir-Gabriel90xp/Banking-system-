@@ -1,0 +1,34 @@
+<!-- src/app/features/loans/loan-form/loan-form.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Nueva solicitud</div>
+    <h1 class="title">Solicitar préstamo</h1>
+  </div>
+  <a routerLink="/loans" class="btn-secondary">← Volver</a>
+</div>
+
+<div class="panel">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label class="full">
+      <span>Monto solicitado</span>
+      <input type="text" inputmode="decimal" appMoneyInput formControlName="amount" />
+    </label>
+
+    <label class="full">
+      <span>Plazo (meses)</span>
+      <input type="number" min="1" max="360" formControlName="termMonths" />
+    </label>
+
+    <p class="hint">
+      La tasa de interés y la cuota mensual las calcula el sistema automáticamente.
+    </p>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Enviando...' : 'Solicitar préstamo' }}
+    </button>
+  </form>
+</div>

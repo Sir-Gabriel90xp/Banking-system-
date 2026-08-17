@@ -1,0 +1,58 @@
+<!-- src/app/features/payments/payment-form/payment-form.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Nuevo pago</div>
+    <h1 class="title">Registrar pago</h1>
+  </div>
+  <a routerLink="/payments" class="btn-secondary">Volver</a>
+</div>
+
+<div class="panel">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label class="full">
+      <span>Prestamo</span>
+      <select formControlName="loanId">
+        <option value="" disabled>Seleccionar prestamo aprobado...</option>
+        @for (l of loans(); track l.id) {
+          <option [value]="l.id">
+            {{ l.amount | number: '1.2-2' }} - cuota {{ l.monthlyPayment | number: '1.2-2' }} ({{ l.termMonths }} meses)
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="full">
+      <span>Cuenta origen</span>
+      <select formControlName="accountId">
+        <option value="" disabled>Seleccionar cuenta activa...</option>
+        @for (account of filteredAccounts(); track account.id) {
+          <option [value]="account.id">
+            {{ account.accountNumber }} - {{ account.currency }} {{ account.balance | number: '1.2-2' }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <div class="row">
+      <label>
+        <span>Monto</span>
+        <input type="text" inputmode="decimal" appMoneyInput formControlName="amount" />
+      </label>
+
+      <label>
+        <span>Metodo</span>
+        <select formControlName="paymentMethod">
+          <option value="ACCOUNT_DEBIT">Debito de cuenta</option>
+        </select>
+      </label>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Registrando...' : 'Registrar pago' }}
+    </button>
+  </form>
+</div>

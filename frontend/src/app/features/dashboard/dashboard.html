@@ -1,0 +1,62 @@
+<!-- src/app/features/dashboard/dashboard.html -->
+<div class="topbar">
+  <div>
+    <div class="greeting-eyebrow">{{ today }}</div>
+    <h1 class="greeting">Buenos dias, {{ authService.currentUser()?.username }}</h1>
+  </div>
+  <span class="badge-role">{{ authService.currentUser()?.role }}</span>
+</div>
+
+@if (loading()) {
+  <p class="state-msg">Cargando cuentas...</p>
+} @else if (errorMessage()) {
+  <p class="state-msg error">{{ errorMessage() }}</p>
+} @else {
+  <div class="grid-top">
+    <div class="ledger-card">
+      <div class="ledger-top-row">
+        <div>
+          <div class="ledger-label">Saldo consolidado</div>
+          <div class="ledger-account">{{ accounts().length }} cuenta(s) activa(s)</div>
+        </div>
+      </div>
+
+      <div class="ledger-balance">{{ formatMoney(totalBalance) }}</div>
+
+      <hr class="ledger-rule">
+
+      <div class="quick-actions">
+        @if (isStaff()) {
+          <a routerLink="/customers/new" class="qa-btn primary">Nuevo cliente</a>
+          <a routerLink="/accounts/new" class="qa-btn">Nueva cuenta</a>
+          <a routerLink="/transfers" class="qa-btn">Ver transferencias</a>
+        } @else {
+          <a routerLink="/transfers/new" class="qa-btn primary">Transferir</a>
+          <a routerLink="/payments/new" class="qa-btn">Pagar prestamo</a>
+          <a routerLink="/loans/new" class="qa-btn">Solicitar prestamo</a>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Mis cuentas</span>
+    </div>
+
+    @for (acc of accounts(); track acc.id) {
+      <div class="account-row">
+        <div class="acc-left">
+          <span class="acc-dot" [class.blocked]="acc.status === 'BLOCKED'"></span>
+          <div>
+            <div class="acc-name">{{ acc.accountType }}</div>
+            <div class="acc-number">{{ acc.accountNumber }}</div>
+          </div>
+        </div>
+        <div class="acc-balance">{{ acc.currency }} {{ formatMoney(acc.balance) }}</div>
+      </div>
+    } @empty {
+      <p class="state-msg">Todavia no tienes cuentas registradas.</p>
+    }
+  </div>
+}

@@ -1,0 +1,103 @@
+<!-- src/app/features/customers/customer-form/customer-form.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">{{ isEditMode() ? 'Editar cliente' : 'Nuevo cliente' }}</div>
+    <h1 class="title">{{ isEditMode() ? 'Actualizar datos' : 'Registrar cliente' }}</h1>
+  </div>
+  <a routerLink="/customers" class="btn-secondary">Volver</a>
+</div>
+
+<div class="panel">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row">
+      <label>
+        <span>Nombre</span>
+        <input type="text" formControlName="firstName" />
+      </label>
+      <label>
+        <span>Apellido</span>
+        <input type="text" formControlName="lastName" />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>
+        <span>Documento de identidad</span>
+        <input type="text" formControlName="documentNumber" />
+      </label>
+      <label>
+        <span>Fecha de nacimiento</span>
+        <input type="date" formControlName="birthDate" />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>
+        <span>Correo electronico</span>
+        <input type="email" formControlName="email" />
+      </label>
+      <label>
+        <span>Telefono</span>
+        <input type="text" formControlName="phone" />
+      </label>
+    </div>
+
+    <label class="full">
+      <span>Direccion</span>
+      <input type="text" formControlName="address" />
+    </label>
+
+    @if (!isEditMode()) {
+      <section class="option-block">
+        <label class="check-row">
+          <input type="checkbox" formControlName="createLoginUser" />
+          <span>Crear usuario de acceso</span>
+        </label>
+
+        @if (form.get('createLoginUser')?.value) {
+          <div class="row">
+            <label>
+              <span>Usuario</span>
+              <input type="text" formControlName="username" autocomplete="off" />
+            </label>
+            <label>
+              <span>Clave temporal</span>
+              <input type="password" formControlName="password" autocomplete="new-password" />
+            </label>
+          </div>
+        }
+      </section>
+
+      <section class="option-block">
+        <label class="check-row">
+          <input type="checkbox" formControlName="createInitialAccount" />
+          <span>Abrir cuenta inicial</span>
+        </label>
+
+        @if (form.get('createInitialAccount')?.value) {
+          <div class="row">
+            <label>
+              <span>Tipo de cuenta</span>
+              <select formControlName="initialAccountType">
+                <option value="SAVINGS">Ahorro</option>
+                <option value="CHECKING">Corriente</option>
+              </select>
+            </label>
+            <label>
+              <span>Saldo inicial USD</span>
+              <input type="text" inputmode="decimal" appMoneyInput formControlName="initialBalance" />
+            </label>
+          </div>
+        }
+      </section>
+    }
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Guardando...' : (isEditMode() ? 'Guardar cambios' : 'Registrar cliente') }}
+    </button>
+  </form>
+</div>

@@ -1,0 +1,128 @@
+// src/app/features/fraud/fraud-list/fraud-list.scss
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 6px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.btn-secondary {
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline);
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { border-color: var(--ink); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.panel {
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.state-msg {
+  padding: 30px 22px;
+  text-align: center;
+  color: var(--slate);
+  font-size: 14px;
+
+  &.error { color: var(--brick); }
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 13.5px;
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAF8F3; }
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--slate);
+}
+
+.subtle {
+  margin-top: 3px;
+  opacity: 0.7;
+}
+
+.status-pill {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  background: var(--emerald-soft);
+  color: var(--emerald);
+  padding: 4px 10px;
+  border-radius: 100px;
+
+  &.danger {
+    background: var(--brick-soft);
+    color: var(--brick);
+  }
+
+  &.inactive {
+    background: var(--paper);
+    color: var(--slate);
+    border: 1px solid var(--hairline);
+  }
+}
+
+.actions { text-align: right; }
+
+.link-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--emerald);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) { text-decoration: underline; }
+}

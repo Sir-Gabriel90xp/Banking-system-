@@ -1,0 +1,39 @@
+<!-- src/app/features/auth/register/register.html -->
+<div class="login-shell">
+  <div class="login-card">
+    <div class="brand-mark">B·S</div>
+    <h1>Crear cuenta</h1>
+    <p class="subtitle">Regístrate para acceder al sistema</p>
+
+    @if (success()) {
+      <p class="success-msg">Cuenta creada. Redirigiendo al login...</p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          <span>Nombre de usuario</span>
+          <input type="text" formControlName="username" placeholder="gabriel" />
+        </label>
+        <label>
+          <span>Correo electrónico</span>
+          <input type="email" formControlName="email" placeholder="tucorreo@banco.com" />
+        </label>
+        <label>
+          <span>Contraseña</span>
+          <input type="password" formControlName="password" placeholder="Mínimo 8 caracteres" />
+        </label>
+
+        <button type="submit" [disabled]="form.invalid || loading()">
+          {{ loading() ? 'Creando cuenta...' : 'Registrarme' }}
+        </button>
+
+        @if (errorMessage()) {
+          <p class="error">{{ errorMessage() }}</p>
+        }
+      </form>
+
+      <p class="footer-link">
+        ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+      </p>
+    }
+  </div>
+</div>

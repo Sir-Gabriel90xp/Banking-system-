@@ -1,0 +1,71 @@
+<!-- src/app/features/loans/loan-list/loan-list.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Gestión de préstamos</div>
+    <h1 class="title">Préstamos</h1>
+  </div>
+  @if (isCustomer()) {
+    <a routerLink="/loans/new" class="btn-primary">+ Solicitar préstamo</a>
+  }
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="state-msg">Cargando préstamos...</p>
+  } @else if (errorMessage()) {
+    <p class="state-msg error">{{ errorMessage() }}</p>
+  } @else {
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Monto</th>
+          <th>Tasa</th>
+          <th>Plazo</th>
+          <th>Cuota mensual</th>
+          <th>Estado</th>
+          <th>Solicitado</th>
+          @if (isStaff()) {
+            <th></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of loans(); track l.id) {
+          <tr>
+            <td class="mono amount">{{ l.amount | number: '1.2-2' }}</td>
+            <td class="mono">{{ l.interestRate | percent: '1.0-2' }}</td>
+            <td class="mono">{{ l.termMonths }} meses</td>
+            <td class="mono amount">{{ l.monthlyPayment | number: '1.2-2' }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [class.inactive]="l.status === 'REJECTED'"
+              >
+                {{ l.status }}
+              </span>
+            </td>
+            <td class="mono">{{ l.createdAt | date: 'short' }}</td>
+            @if (isStaff()) {
+              <td class="actions">
+                @if (l.status === 'PENDING') {
+                  <button class="link-btn" (click)="approve(l.id)">Aprobar</button>
+                  <button class="link-btn danger" (click)="reject(l.id)">Rechazar</button>
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="state-msg">No hay préstamos registrados todavía.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0">← Anterior</button>
+        <span>Página {{ currentPage() + 1 }} de {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">Siguiente →</button>
+      </div>
+    }
+  }
+</div>

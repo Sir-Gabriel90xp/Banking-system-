@@ -12,6 +12,20 @@
 
 ---
 
+# Regla permanente de documentacion
+
+Todo avance del proyecto debe quedar guardado en `docs/` antes de cerrar una sesion de trabajo.
+
+Minimo esperado por cada cambio relevante:
+
+- actualizar `AI_HANDOFF.md` con resumen, verificacion y siguiente paso;
+- actualizar `docs/management/tareas.md` con completado/pendiente;
+- actualizar `docs/management/bitacora.md` cuando se implemente, corrija o cambie comportamiento;
+- crear o actualizar el documento de API correspondiente en `docs/api/` si se toca un contrato backend/frontend;
+- registrar una decision en `docs/management/decisiones.md` cuando se tome una decision tecnica que afecte comportamiento, arquitectura o configuracion.
+
+---
+
 # 1. Información General
 
 ## Nombre del Proyecto

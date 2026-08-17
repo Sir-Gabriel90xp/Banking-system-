@@ -1,0 +1,32 @@
+<!-- src/app/features/auth/login/login.html -->
+<div class="login-shell">
+  <div class="login-card">
+    <div class="brand-mark">B·S</div>
+    <h1>Banking System</h1>
+    <p class="subtitle">Ingresa con tus credenciales para continuar</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>
+        <span>Correo electrónico</span>
+        <input type="email" formControlName="email" placeholder="tucorreo@banco.com" />
+      </label>
+      <label>
+        <span>Contraseña</span>
+        <input type="password" formControlName="password" placeholder="••••••••" />
+      </label>
+
+      <button type="submit" [disabled]="form.invalid || loading">
+        {{ loading ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+    </form>
+
+    <p class="footer-link">
+  ¿No tienes cuenta? <a routerLink="/register">Regístrate</a>
+</p>
+
+  </div>
+</div>

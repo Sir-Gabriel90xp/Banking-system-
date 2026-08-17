@@ -1,0 +1,88 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: banking-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-banking_system}
+      POSTGRES_USER: ${POSTGRES_USER:-banking_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-banking_pass}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-banking_user} -d ${POSTGRES_DB:-banking_system}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - banking-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: banking-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-banking_user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-banking_pass}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"       # AMQP
+      - "${RABBITMQ_UI_PORT:-15672}:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - banking-network
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: banking-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-banking_system}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-banking_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-banking_pass}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-banking_user}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASS:-banking_pass}
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - banking-network
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: banking-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    networks:
+      - banking-network
+
+networks:
+  banking-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
