@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve --host localhost --port 4200",
     "start:4202": "ng serve --host localhost --port 4202",
-    "build": "ng build",
+    "build": "node scripts/write-api-url.mjs && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

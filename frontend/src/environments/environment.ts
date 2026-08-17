@@ -1,5 +1,7 @@
 // src/environments/environment.ts
+import { generatedApiUrl } from './api-url.generated';
+
 export const environment = {
   production: true,
-  apiUrl: '/api/v1'  // en producción, el reverse proxy resuelve esto
+  apiUrl: generatedApiUrl
 };
