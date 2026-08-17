@@ -1,0 +1,73 @@
+<!-- src/app/features/audit/audit-list/audit-list.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Solo lectura · Admin</div>
+    <h1 class="title">Auditoría</h1>
+  </div>
+</div>
+
+<div class="toolbar">
+  <input
+    type="text"
+    placeholder="Filtrar por entidad (ej: Transfer, Loan)..."
+    [(ngModel)]="entityFilter"
+    (keyup.enter)="onFilter()"
+  />
+  <input type="date" [(ngModel)]="fromFilter" (change)="onFilter()" />
+  <input type="date" [(ngModel)]="toFilter" (change)="onFilter()" />
+  <button class="btn-secondary" (click)="onFilter()">Filtrar</button>
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="state-msg">Cargando registros de auditoría...</p>
+  } @else if (errorMessage()) {
+    <p class="state-msg error">{{ errorMessage() }}</p>
+  } @else {
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Acción</th>
+          <th>Entidad</th>
+          <th>ID de entidad</th>
+          <th>IP</th>
+          <!-- Fuente: ipwho.is (geolocalización de IP, sin key) -->
+          <th>País</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (log of logs(); track log.id) {
+          <tr>
+            <td class="name-cell">{{ log.username }}</td>
+            <td>{{ log.action }}</td>
+            <td>{{ log.entity }}</td>
+            <td class="mono">{{ log.entityId }}</td>
+            <td class="mono">{{ log.ipAddress }}</td>
+            <td>
+              @if (countries()[log.ipAddress] === undefined) {
+                <span class="mono">...</span>
+              } @else if (countries()[log.ipAddress] === null) {
+                <span class="mono">—</span>
+              } @else {
+                {{ countries()[log.ipAddress] }}
+              }
+            </td>
+            <td class="mono">{{ log.timestamp | date: 'medium' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="state-msg">No hay registros de auditoría para este filtro.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0">← Anterior</button>
+        <span>Página {{ currentPage() + 1 }} de {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">Siguiente →</button>
+      </div>
+    }
+  }
+</div>

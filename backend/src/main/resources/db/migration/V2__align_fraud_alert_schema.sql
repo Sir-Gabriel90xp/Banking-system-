@@ -1,0 +1,4 @@
+ALTER TABLE fraud_alert
+    ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
+    ADD COLUMN created_by VARCHAR(100),
+    ADD COLUMN updated_by VARCHAR(100);

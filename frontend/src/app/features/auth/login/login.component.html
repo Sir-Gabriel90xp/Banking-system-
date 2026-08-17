@@ -1,0 +1,20 @@
+<!-- src/app/features/auth/login/login.component.html -->
+<div class="login-container">
+  <h1>Banking System</h1>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Email
+      <input type="email" formControlName="email" />
+    </label>
+    <label>
+      Contraseña
+      <input type="password" formControlName="password" />
+    </label>
+    <button type="submit" [disabled]="form.invalid || loading">
+      {{ loading ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+    @if (errorMessage) {
+      <p class="error">{{ errorMessage }}</p>
+    }
+  </form>
+</div>

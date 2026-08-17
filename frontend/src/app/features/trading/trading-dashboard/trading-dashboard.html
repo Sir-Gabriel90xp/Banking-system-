@@ -1,0 +1,162 @@
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Inversiones</div>
+    <h1 class="title">Trading</h1>
+  </div>
+  <button class="ghost-btn" type="button" (click)="loadTrading()" [disabled]="loading()">Actualizar</button>
+</div>
+
+@if (errorMessage()) {
+  <p class="state-msg error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+  <p class="state-msg success">{{ successMessage() }}</p>
+}
+
+<section class="summary-strip">
+  <div>
+    <span>Efectivo trading</span>
+    <strong>{{ formatMoney(wallet()?.cashBalance, wallet()?.currency ?? 'USD') }}</strong>
+  </div>
+  <div>
+    <span>Portafolio</span>
+    <strong>{{ formatMoney(wallet()?.portfolioValue, wallet()?.currency ?? 'USD') }}</strong>
+  </div>
+  <div>
+    <span>Equity total</span>
+    <strong>{{ formatMoney(wallet()?.totalEquity, wallet()?.currency ?? 'USD') }}</strong>
+  </div>
+  <div>
+    <span>Banco disponible</span>
+    <strong>{{ formatMoney(totalBankBalance(), accounts()[0]?.currency ?? 'DOP') }}</strong>
+  </div>
+</section>
+
+<div class="trade-grid">
+  <section class="chart-panel">
+    <div class="chart-head">
+      <div>
+        <span class="panel-title">{{ chartSymbol() }}</span>
+        <small>TradingView</small>
+      </div>
+      <div class="quick-symbols">
+        <button class="ghost-btn" type="button" (click)="useSymbol('NASDAQ:AAPL')">AAPL</button>
+        <button class="ghost-btn" type="button" (click)="useSymbol('NASDAQ:MSFT')">MSFT</button>
+        <button class="ghost-btn" type="button" (click)="useSymbol('NASDAQ:NVDA')">NVDA</button>
+      </div>
+    </div>
+    <div class="chart-host" #tradingViewHost></div>
+  </section>
+
+  <aside class="ticket-panel">
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Orden</span>
+      </div>
+      <form class="stack-form" [formGroup]="orderForm">
+        <label>
+          <span>Simbolo</span>
+          <input formControlName="symbol" maxlength="40" placeholder="NASDAQ:AAPL">
+        </label>
+        <label>
+          <span>Cantidad</span>
+          <input formControlName="quantity" type="number" min="0.000001" step="0.000001">
+        </label>
+        <div class="button-row two">
+          <button type="button" class="buy-btn" (click)="buy()" [disabled]="actionLoading()">Comprar</button>
+          <button type="button" class="sell-btn" (click)="sell()" [disabled]="actionLoading()">Vender</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel cash-panel">
+      <div class="panel-head">
+        <span class="panel-title">Efectivo</span>
+      </div>
+      <form class="stack-form" [formGroup]="cashForm">
+        <label>
+          <span>Cuenta</span>
+          <select formControlName="accountId">
+            @for (account of accounts(); track account.id) {
+              <option [value]="account.id">
+                {{ account.accountType }} · {{ account.accountNumber }} · {{ formatMoney(account.balance, account.currency) }}
+              </option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Monto</span>
+          <input formControlName="amount" type="number" min="0.01" step="0.01">
+        </label>
+        <div class="button-row two">
+          <button type="button" (click)="deposit()" [disabled]="actionLoading() || accounts().length === 0">Ingresar</button>
+          <button type="button" class="ghost-btn" (click)="withdraw()" [disabled]="actionLoading() || accounts().length === 0">Retirar</button>
+        </div>
+      </form>
+    </section>
+  </aside>
+</div>
+
+<div class="lower-grid">
+  <section class="panel">
+    <div class="panel-head split">
+      <span class="panel-title">Posiciones</span>
+      <span class="count-pill">{{ positions().length }}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Simbolo</th>
+            <th>Cantidad</th>
+            <th>Promedio</th>
+            <th>Ultimo</th>
+            <th>Valor</th>
+            <th>P/L</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (position of positions(); track position.id) {
+            <tr>
+              <td><button class="link-btn" type="button" (click)="useSymbol(position.displaySymbol)">{{ position.displaySymbol }}</button></td>
+              <td>{{ formatQuantity(position.quantity) }}</td>
+              <td>{{ formatMoney(position.averagePrice, wallet()?.currency ?? 'USD') }}</td>
+              <td>{{ formatMoney(position.lastPrice, wallet()?.currency ?? 'USD') }}</td>
+              <td>{{ formatMoney(position.marketValue, wallet()?.currency ?? 'USD') }}</td>
+              <td [class.up]="position.unrealizedPnl >= 0" [class.down]="position.unrealizedPnl < 0">
+                {{ formatMoney(position.unrealizedPnl, wallet()?.currency ?? 'USD') }}
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-cell">Sin posiciones.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head split">
+      <span class="panel-title">Ordenes</span>
+      <span class="count-pill">{{ orders().length }}</span>
+    </div>
+    <div class="order-list">
+      @for (order of orders(); track order.id) {
+        <button class="order-row" type="button" (click)="useSymbol(order.displaySymbol)">
+          <span>
+            <strong>{{ order.side === 'BUY' ? 'Compra' : 'Venta' }} {{ order.displaySymbol }}</strong>
+            <small>{{ order.createdAt | date:'dd MMM yyyy, HH:mm' }}</small>
+          </span>
+          <em [class.buy]="order.side === 'BUY'" [class.sell]="order.side === 'SELL'">
+            {{ formatMoney(order.grossAmount, wallet()?.currency ?? 'USD') }}
+          </em>
+        </button>
+      } @empty {
+        <p class="state-msg compact">Sin ordenes.</p>
+      }
+    </div>
+  </section>
+</div>

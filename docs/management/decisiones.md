@@ -1061,3 +1061,108 @@ Es una decisión de secuencia de trabajo, no de arquitectura: Spring Security y 
 - Es probable que se necesite un DTO/Mapper mínimo para `AppUser`/`Role` como parte de la propia implementación de Auth (login, registro, perfil `/me`) — esto no contradice ADR-004, simplemente adelanta ese DTO puntual en vez de crear los 10 de una vez.
 - No afecta el diseño de endpoints ya aprobado (`11_endpoints.md`) ni el modelo de datos. Es un reordenamiento de tareas, no un cambio de alcance.
 - `AI_HANDOFF.md` y `tareas.md` deben actualizarse al cierre de esta fase para reflejar el nuevo orden ejecutado.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+# ADR-008
+
+## Usar ResponseStatusException en vez de excepciones de negocio propias (temporal)
+
+Fecha:
+
+18/07/2026
+
+Estado:
+
+Aceptado (provisional)
+
+## Decisión
+
+Para el manejo de errores del módulo Auth (`AuthService`, `GlobalExceptionHandler`), se usó `org.springframework.web.server.ResponseStatusException` en vez de crear ya la jerarquía de excepciones de negocio mencionada en `02_architecture.md` (`ResourceNotFoundException`, `ValidationException`, `UnauthorizedException`, `BusinessException`).
+
+## Motivo
+
+Esa jerarquía de excepciones globales todavía no existía en el proyecto (no se habían creado Services/Controllers hasta la Sesión 7). Crearla completa solo para Auth hubiera significado diseñarla sin ver primero las necesidades reales de los demás módulos (Customers, Accounts, Transfers, Loans), con riesgo de tener que rehacerla.
+
+## Impacto
+
+- `GlobalExceptionHandler` (nuevo, en `exceptions/`) por ahora solo mapea `ResponseStatusException` y `MethodArgumentNotValidException` al formato estándar de `04_api_design.md`.
+- Cuando se implemente Fase 3 (Customers, Accounts, Transfers) y surja la necesidad real de excepciones de negocio específicas, se debe crear la jerarquía propia y migrar `AuthService`/`GlobalExceptionHandler` a ella, para no tener dos convenciones de manejo de errores conviviendo en el proyecto.
+- No afecta el contrato de la API: el formato de respuesta de error (`success/message/errors/timestamp`) es el mismo sin importar qué tipo de excepción lo produce.
+
+
+
+
+
+
+
+
+
+
+
+
+## ADR-0XX: Identidad visual del frontend — estética "ledger" en vez de defaults de Angular/IA
+
+**Contexto:** El scaffold default de Angular y los estilos "genéricos" de IA (cream+terracota, negro+neón, etc.) no comunican confianza bancaria ni tienen relación con el dominio del proyecto.
+
+**Decisión:** Adoptar una identidad basada en libretas contables reales: fondo tinta oscura para navegación, papel claro para contenido, cifras siempre en tipografía monoespaciada con `tabular-nums` (autenticidad de extracto bancario), acento dorado para jerarquía y esmeralda/terracota para créditos/débitos. Tokens centralizados en `styles.scss` como variables CSS.
+
+**Alcance:** Aplica a login, registro, shell (sidebar/topbar) y todos los módulos subsecuentes — mantener consistencia, no reinventar paleta por módulo.
+
+---
+
+## ADR-0XX: Autorización debe vivir en el backend, no solo ocultarse en el frontend
+
+**Contexto:** Al registrar un usuario público con rol CUSTOMER, se comprobó que podía acceder a `/customers` (gestión de otros clientes) simplemente escribiendo la URL, porque `CustomerController.list()` no tenía `@PreAuthorize`. El sidebar tampoco distinguía roles.
+
+**Decisión:** 
+1. El frontend oculta opciones de navegación según rol (cosmético, mejora UX) vía signals computados en `Shell` y un `roleGuard` reutilizable por ruta.
+2. Esto **no reemplaza** la autorización real: cada endpoint del backend debe validar el rol con `@PreAuthorize` explícito, sin asumir que el frontend "se porta bien". Pendiente auditar todos los controllers existentes bajo esta premisa.
+
+**Regla general adoptada:** ningún dato o acción sensible debe depender únicamente de que la UI no muestre el botón — el backend es la única fuente de verdad para permisos.
+
+---
+
+## Nota técnica: no adivinar contratos de API
+
+**Contexto:** Varias horas de la Sesión 10 se fueron en corregir desajustes entre lo que el frontend asumía (`accessToken`, `role` sin prefijo) y lo que el backend realmente devolvía (`token`, `role` con prefijo `ROLE_`), porque el frontend se construyó antes de confirmar la forma real de las respuestas.
+
+**Regla adoptada de aquí en adelante:** antes de construir un módulo nuevo del frontend, confirmar con `curl` contra el backend real + lectura directa de los DTOs/Controller correspondientes. Nunca asumir nombres de campo por convención o por lo que "debería" ser.
+---
+
+## ADR-0XX: Compilar backend a Java 21 para compatibilidad local
+
+**Fecha:** 17/08/2026
+
+**Contexto:** El backend estaba configurado con `<java.version>25</java.version>`, generando clases `class file version 69`. En una terminal con JDK 21 en `PATH`, esas clases no arrancan (`UnsupportedClassVersionError`) y Maven tampoco puede compilar con `--release 25`.
+
+**Decision:** Mantener Spring Boot 4.1.0, pero compilar el proyecto con target Java 21 (`<java.version>21</java.version>`). JDK 25 puede ejecutar bytecode Java 21, y JDK 21 queda soportado para desarrollo local.
+
+**Impacto:** Despues del cambio se debe ejecutar `mvn clean spring-boot:run` al menos una vez para eliminar clases antiguas compiladas a Java 25.
+
+---
+
+## ADR-0XX: Trading local debe seguir funcionando sin API key de mercado
+
+**Fecha:** 17/08/2026
+
+**Contexto:** El modulo Trading necesita precio de ejecucion para comprar/vender. Finnhub ya existe en el proyecto, pero en desarrollo local `FINNHUB_API_KEY` puede no estar configurada y eso no debe bloquear el flujo de deposito, compra, venta y retiro.
+
+**Decision:** `TradingService` intenta obtener el quote con Finnhub y, si no hay API key o la llamada falla, usa un precio demo deterministico basado en el simbolo. El frontend mantiene TradingView para visualizacion del grafico.
+
+**Impacto:** El flujo local funciona sin secretos externos. En produccion, configurar `FINNHUB_API_KEY` para precios reales antes de considerar las ordenes como datos financieros reales.

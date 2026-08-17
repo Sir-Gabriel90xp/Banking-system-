@@ -10,7 +10,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
+        '[format_sql]': true
 
   flyway:
     enabled: true
@@ -19,13 +19,34 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
   error:
     include-message: always
 
-jwt:
-  secret: ${JWT_SECRET:change-this-secret-in-production}
-  expiration-ms: ${JWT_EXPIRATION_MS:3600000}        # 1h access token
-  refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}  # 7 días refresh token
+# Custom application properties used by the project.
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-in-production}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}        # 1h access token
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}  # 7 días refresh token
+  loan:
+    interest-rate:
+      annual: 0.12
+  transfer:
+    daily-limit: ${TRANSFER_DAILY_LIMIT:10}
+  exchange-rates:
+    frankfurter-base-url: ${FRANKFURTER_BASE_URL:https://api.frankfurter.dev}
+  bpd:
+    base-url: ${BPD_API_BASE_URL:https://api.us-east-a.apiconnect.ibmappdomain.cloud}
+    confirm-account-path: ${BPD_CONFIRM_ACCOUNT_PATH:/apiportalpopular/bpdsandbox/bpdconfirmarcuenta}
+    atm-locations-path: ${BPD_ATM_LOCATIONS_PATH:/apiportalpopular/bpdsandbox/ubicacionesatm}
+    token-url: ${BPD_TOKEN_URL:https://api.us-east-a.apiconnect.ibmappdomain.cloud/apiportalpopular/bpdsandbox/bpd/Authentication/oauth2/token}
+    client-id: ${BPD_CLIENT_ID:}
+    client-secret: ${BPD_CLIENT_SECRET:}
+    scope: ${BPD_OAUTH_SCOPE:scope_1}
+  finnhub:
+    base-url: ${FINNHUB_BASE_URL:https://finnhub.io/api/v1}
+    api-key: ${FINNHUB_API_KEY:}
 
 springdoc:
   api-docs:
@@ -35,5 +56,5 @@ springdoc:
 
 logging:
   level:
-    com.bankingsystem: DEBUG
-    org.springframework.security: INFO
+    '[com.bankingsystem]': DEBUG
+    '[org.springframework.security]': INFO

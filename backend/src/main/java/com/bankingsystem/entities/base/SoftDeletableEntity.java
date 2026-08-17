@@ -28,6 +28,22 @@ public abstract class SoftDeletableEntity extends Auditable {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
     public void markAsDeleted() {
         this.deleted = true;
         this.deletedAt = Instant.now();

@@ -1,0 +1,86 @@
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Integracion externa</div>
+    <h1 class="title">Banco Popular</h1>
+  </div>
+  <span class="source-pill">BPD API Connect</span>
+</div>
+
+<div class="grid">
+  <section class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Confirmar titularidad</span>
+    </div>
+
+    <form class="form" (ngSubmit)="confirmAccount()">
+      <label>
+        <span>Tipo</span>
+        <select name="documentType" [(ngModel)]="confirmRequest.documentType">
+          @for (type of documentTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Documento</span>
+        <input name="documentNumber" [(ngModel)]="confirmRequest.documentNumber" placeholder="Sin guiones" required>
+      </label>
+
+      <label>
+        <span>Cuenta</span>
+        <input name="accountNumber" [(ngModel)]="confirmRequest.accountNumber" placeholder="Numero de cuenta" required>
+      </label>
+
+      <button class="btn-primary" type="submit" [disabled]="confirming()">
+        Validar cuenta
+      </button>
+    </form>
+
+    @if (confirmError()) {
+      <p class="state-msg error compact">{{ confirmError() }}</p>
+    } @else if (confirmResult()) {
+      <div class="result" [class.ok]="confirmResult()?.status" [class.bad]="!confirmResult()?.status">
+        <div class="result-label">Resultado</div>
+        <div class="result-value">{{ confirmResult()?.status ? 'TRUE' : 'FALSE' }}</div>
+        <p>{{ confirmResult()?.message }}</p>
+      </div>
+    }
+  </section>
+
+  <section class="panel">
+    <div class="panel-head split">
+      <span class="panel-title">Ubicaciones ATM</span>
+      <button class="btn-secondary" type="button" (click)="loadAtms()" [disabled]="loadingAtms()">Actualizar</button>
+    </div>
+
+    @if (loadingAtms()) {
+      <p class="state-msg">Cargando cajeros...</p>
+    } @else if (atmError()) {
+      <p class="state-msg error">{{ atmError() }}</p>
+    } @else {
+      <div class="atm-list">
+        @for (atm of atmLocations(); track atm.id) {
+          <div class="atm-row">
+            <div>
+              <div class="atm-name">{{ atm.name }}</div>
+              <div class="atm-address">{{ atm.address }}</div>
+              <div class="atm-meta">{{ atm.category }} | {{ atm.schedule }}</div>
+            </div>
+            @if (mapsUrl(atm); as url) {
+              <a class="map-link" [href]="url" target="_blank" rel="noreferrer">Mapa</a>
+            }
+          </div>
+        } @empty {
+          <p class="state-msg compact">No hay cajeros para esta pagina.</p>
+        }
+      </div>
+
+      <div class="pager">
+        <button type="button" (click)="prevAtmPage()" [disabled]="atmPage() === 0">Anterior</button>
+        <span>Pagina {{ atmPage() }}</span>
+        <button type="button" (click)="nextAtmPage()" [disabled]="atmPage() >= 99">Siguiente</button>
+      </div>
+    }
+  </section>
+</div>

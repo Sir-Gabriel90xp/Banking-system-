@@ -1,0 +1,155 @@
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Datos financieros</div>
+    <h1 class="title">Mercados</h1>
+  </div>
+  <span class="source-pill">Finnhub</span>
+</div>
+
+@if (errorMessage()) {
+  <p class="state-msg error">{{ errorMessage() }}</p>
+}
+
+<div class="grid">
+  <section class="panel search-panel">
+    <div class="panel-head">
+      <span class="panel-title">Buscar simbolo</span>
+    </div>
+
+    <form class="search-form" (ngSubmit)="searchSymbols()">
+      <input name="query" [(ngModel)]="query" placeholder="Apple, AAPL, ISIN">
+      <input name="exchange" [(ngModel)]="exchange" maxlength="8" placeholder="US">
+      <button type="submit" [disabled]="loadingSearch()">Buscar</button>
+    </form>
+
+    <div class="result-list">
+      @for (item of searchResults().slice(0, 8); track item.symbol) {
+        <button type="button" class="symbol-row" (click)="selectSymbol(item.symbol)">
+          <span>
+            <strong>{{ item.displaySymbol }}</strong>
+            <small>{{ item.description }}</small>
+          </span>
+          <em>{{ item.type }}</em>
+        </button>
+      } @empty {
+        <p class="state-msg compact">Sin resultados.</p>
+      }
+    </div>
+  </section>
+
+  <section class="panel quote-panel">
+    <div class="panel-head split">
+      <span class="panel-title">{{ selectedSymbol }}</span>
+      <button class="ghost-btn" type="button" (click)="loadSymbol()" [disabled]="loadingSymbol()">Actualizar</button>
+    </div>
+
+    @if (quote()) {
+      <div class="quote-main">
+        @if (profile()?.logo) {
+          <img [src]="profile()?.logo" alt="">
+        }
+        <div>
+          <div class="company-name">{{ profile()?.name || selectedSymbol }}</div>
+          <div class="company-meta">{{ profile()?.exchange }} | {{ profile()?.currency }}</div>
+        </div>
+        <div class="price">
+          {{ quote()?.currentPrice | number: '1.2-2' }}
+          <span [class.up]="(quote()?.change ?? 0) >= 0" [class.down]="(quote()?.change ?? 0) < 0">
+            {{ quote()?.change | number: '1.2-2' }} ({{ quote()?.percentChange | number: '1.2-2' }}%)
+          </span>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div><span>Alta dia</span><strong>{{ quote()?.highPriceOfDay | number: '1.2-2' }}</strong></div>
+        <div><span>Baja dia</span><strong>{{ quote()?.lowPriceOfDay | number: '1.2-2' }}</strong></div>
+        <div><span>Apertura</span><strong>{{ quote()?.openPriceOfDay | number: '1.2-2' }}</strong></div>
+        <div><span>Cierre previo</span><strong>{{ quote()?.previousClosePrice | number: '1.2-2' }}</strong></div>
+      </div>
+    } @else {
+      <p class="state-msg">Selecciona un simbolo.</p>
+    }
+  </section>
+</div>
+
+<div class="grid lower">
+  <section class="panel">
+    <div class="panel-head split">
+      <span class="panel-title">Mercado {{ exchange }}</span>
+      <button class="ghost-btn" type="button" (click)="loadMarket()" [disabled]="loadingMarket()">Actualizar</button>
+    </div>
+
+    <div class="market-state">
+      <span class="dot" [class.open]="status()?.isOpen"></span>
+      <div>
+        <strong>{{ status()?.isOpen ? 'Abierto' : 'Cerrado' }}</strong>
+        <small>{{ status()?.session || status()?.holiday || status()?.timezone }}</small>
+      </div>
+    </div>
+
+    <div class="holiday-list">
+      @for (holiday of holidays()?.data?.slice(0, 4); track holiday.atDate + holiday.eventName) {
+        <div><strong>{{ holiday.atDate }}</strong><span>{{ holiday.eventName }}</span></div>
+      }
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Indicadores</span>
+    </div>
+    <div class="metrics compact-metrics">
+      <div><span>52W High</span><strong>{{ metricValue('52WeekHigh') ?? '-' }}</strong></div>
+      <div><span>52W Low</span><strong>{{ metricValue('52WeekLow') ?? '-' }}</strong></div>
+      <div><span>P/E</span><strong>{{ metricValue('peBasicExclExtraTTM') ?? '-' }}</strong></div>
+      <div><span>Beta</span><strong>{{ metricValue('beta') ?? '-' }}</strong></div>
+    </div>
+
+    @if (latestRecommendation(); as rec) {
+      <div class="recommendation">
+        <span>{{ rec.period }}</span>
+        <strong>{{ (rec.strongBuy ?? 0) + (rec.buy ?? 0) }} buy</strong>
+        <em>{{ (rec.sell ?? 0) + (rec.strongSell ?? 0) }} sell</em>
+      </div>
+    }
+  </section>
+</div>
+
+<section class="panel news-panel">
+  <div class="panel-head split">
+    <span class="panel-title">Noticias</span>
+    <select [(ngModel)]="newsCategory" (change)="loadMarket()">
+      <option value="general">General</option>
+      <option value="forex">Forex</option>
+      <option value="crypto">Crypto</option>
+      <option value="merger">M&A</option>
+    </select>
+  </div>
+
+  <div class="news-grid">
+    @for (item of marketNews(); track item.id) {
+      <a class="news-item" [href]="item.url" target="_blank" rel="noreferrer">
+        <span>{{ item.source }} | {{ formatUnix(item.datetime) }}</span>
+        <strong>{{ item.headline }}</strong>
+      </a>
+    } @empty {
+      <p class="state-msg compact">No hay noticias disponibles.</p>
+    }
+  </div>
+</section>
+
+<section class="panel news-panel">
+  <div class="panel-head">
+    <span class="panel-title">Noticias de {{ selectedSymbol }}</span>
+  </div>
+  <div class="news-grid">
+    @for (item of companyNews(); track item.id) {
+      <a class="news-item" [href]="item.url" target="_blank" rel="noreferrer">
+        <span>{{ item.source }} | {{ formatUnix(item.datetime) }}</span>
+        <strong>{{ item.headline }}</strong>
+      </a>
+    } @empty {
+      <p class="state-msg compact">No hay noticias recientes para este simbolo.</p>
+    }
+  </div>
+</section>

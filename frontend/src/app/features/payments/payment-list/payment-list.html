@@ -1,0 +1,51 @@
+<!-- src/app/features/payments/payment-list/payment-list.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Historial</div>
+    <h1 class="title">Pagos</h1>
+  </div>
+  <a routerLink="/payments/new" class="btn-primary">+ Registrar pago</a>
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="state-msg">Cargando pagos...</p>
+  } @else if (errorMessage()) {
+    <p class="state-msg error">{{ errorMessage() }}</p>
+  } @else {
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Prestamo</th>
+          <th>Cuenta origen</th>
+          <th>Monto</th>
+          <th>Metodo</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of payments(); track p.id) {
+          <tr>
+            <td class="mono">{{ p.loanId }}</td>
+            <td class="mono">{{ p.accountNumber || p.accountId }}</td>
+            <td class="mono amount">{{ p.amount | number: '1.2-2' }}</td>
+            <td>{{ p.paymentMethod }}</td>
+            <td>{{ p.status }}</td>
+            <td class="mono">{{ p.paymentDate | date: 'short' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="state-msg">No hay pagos registrados todavia.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0">Anterior</button>
+        <span>Pagina {{ currentPage() + 1 }} de {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">Siguiente</button>
+      </div>
+    }
+  }
+</div>

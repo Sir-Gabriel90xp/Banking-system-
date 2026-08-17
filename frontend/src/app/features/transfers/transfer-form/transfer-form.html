@@ -1,0 +1,65 @@
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Nueva transferencia</div>
+    <h1 class="title">Transferir fondos</h1>
+  </div>
+  <a routerLink="/transfers" class="btn-secondary">Volver</a>
+</div>
+
+<div class="panel">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label class="full">
+      <span>Cuenta origen</span>
+      <select formControlName="sourceAccount">
+        <option value="" disabled>Seleccionar cuenta...</option>
+        @for (a of myAccounts(); track a.id) {
+          <option [value]="a.id">{{ a.accountNumber }} - {{ a.balance | number: '1.2-2' }} {{ a.currency }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="full">
+      <span class="field-label">Destino</span>
+      <div class="segmented">
+        <label>
+          <input type="radio" formControlName="destinationMode" value="own">
+          <span>Cuenta propia</span>
+        </label>
+        <label>
+          <input type="radio" formControlName="destinationMode" value="external">
+          <span>Otro usuario</span>
+        </label>
+      </div>
+    </div>
+
+    @if (isOwnDestination()) {
+      <label class="full">
+        <span>Cuenta destino</span>
+        <select formControlName="destinationAccount">
+          <option value="" disabled>Seleccionar cuenta...</option>
+          @for (a of destinationAccounts(); track a.id) {
+            <option [value]="a.id">{{ a.accountNumber }} - {{ a.balance | number: '1.2-2' }} {{ a.currency }}</option>
+          }
+        </select>
+      </label>
+    } @else {
+      <label class="full">
+        <span>Numero de cuenta destino</span>
+        <input type="text" formControlName="destinationAccountNumber" placeholder="Cuenta del usuario destino" />
+      </label>
+    }
+
+    <label class="full">
+      <span>Monto</span>
+      <input type="text" inputmode="decimal" appMoneyInput formControlName="amount" />
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Transfiriendo...' : 'Transferir' }}
+    </button>
+  </form>
+</div>

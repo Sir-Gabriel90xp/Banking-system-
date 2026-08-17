@@ -1,0 +1,52 @@
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Historial</div>
+    <h1 class="title">Transferencias</h1>
+  </div>
+  <a routerLink="/transfers/new" class="btn-primary">Nueva transferencia</a>
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="state-msg">Cargando transferencias...</p>
+  } @else if (errorMessage()) {
+    <p class="state-msg error">{{ errorMessage() }}</p>
+  } @else {
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Cuenta origen</th>
+          <th>Cuenta destino</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of transfers(); track t.id) {
+          <tr>
+            <td class="mono">{{ t.sourceAccountNumber || t.sourceAccount }}</td>
+            <td class="mono">{{ t.destinationAccountNumber || t.destinationAccount }}</td>
+            <td class="mono amount">{{ t.amount | number: '1.2-2' }}</td>
+            <td>
+              <span class="status-pill" [class.inactive]="t.status !== 'COMPLETED'">
+                {{ t.status }}
+              </span>
+            </td>
+            <td class="mono">{{ t.createdAt | date: 'short' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="state-msg">No hay transferencias registradas todavia.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0">Anterior</button>
+        <span>Pagina {{ currentPage() + 1 }} de {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">Siguiente</button>
+      </div>
+    }
+  }
+</div>

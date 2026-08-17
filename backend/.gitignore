@@ -1,0 +1,5 @@
+# Local command outputs
+Get-ChildItem
+compile_output.txt
+cp.txt
+run_output.txt

@@ -18,16 +18,10 @@ import lombok.Setter;
 /**
  * Pago registrado (RF-06).
  *
- * Mapea la tabla `payment` de V1__init_schema.sql.
- *
- * `loan` es opcional a propósito: permite registrar pagos de servicios
- * (RF-06.2) sin necesidad de una entidad "Service" separada, decisión
- * ya registrada en bitacora.md (Sesión 4).
- *
- * No tiene soft delete en el esquema, por eso extiende Auditable
- * directamente. `paymentMethod` y `status` se dejan como texto simple
- * porque el SQL no define una lista cerrada de valores para ninguno
- * de los dos.
+ * Mapea la tabla `payment` de V1__init_schema.sql + V3__add_payment_account.sql.
+ * `loan` y `account` son opcionales a nivel de base de datos para preservar
+ * compatibilidad con registros existentes y permitir pagos de servicios en una
+ * fase futura. El endpoint actual de pago de prestamo exige ambos campos.
  */
 @Entity
 @Table(name = "payment")
@@ -51,4 +45,8 @@ public class Payment extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_id")
     private Loan loan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
 }

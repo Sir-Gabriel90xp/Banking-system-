@@ -1,0 +1,50 @@
+<!-- src/app/features/accounts/account-form/account-form.html -->
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Nueva cuenta</div>
+    <h1 class="title">Abrir cuenta</h1>
+  </div>
+  <a routerLink="/accounts" class="btn-secondary">Volver</a>
+</div>
+
+<div class="panel">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    @if (isStaff()) {
+      <label class="full">
+        <span>Cliente</span>
+        <select formControlName="customerId">
+          <option value="" disabled>Seleccionar cliente...</option>
+          @for (c of customers(); track c.id) {
+            <option [value]="c.id">{{ c.firstName }} {{ c.lastName }} - {{ c.documentNumber }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <div class="row">
+      <label>
+        <span>Tipo de cuenta</span>
+        <select formControlName="accountType">
+          @for (type of accountTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+      </label>
+
+      @if (isStaff()) {
+        <label>
+          <span>Saldo inicial USD</span>
+          <input type="text" inputmode="decimal" appMoneyInput formControlName="initialBalance" />
+        </label>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Creando...' : 'Crear cuenta' }}
+    </button>
+  </form>
+</div>
